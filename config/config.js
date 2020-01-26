@@ -6,6 +6,7 @@ try {
 }
 
 const config = {
+  adminRoleId: localConfig.ADMIN_ROLE_ID || process.env.ADMIN_ROLE_ID,
   anncChannelId: localConfig.ANNC_CHANNEL_ID || process.env.ANNC_CHANNEL_ID,
   discordToken: localConfig.DISCORD_TOKEN || process.env.DISCORD_TOKEN,
 };

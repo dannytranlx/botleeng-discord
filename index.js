@@ -11,6 +11,16 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => {
+  if (msg.member.id === client.user.id) {
+    // Don't process bot's own messages
+    return;
+  }
+
+  if (!msg.member.roles.has(config.adminRoleId)) {
+    // Only admin roles can interact with bot
+    return;
+  }
+
   if (msg.content === '-ping') {
     msg.reply('pong');
   }
