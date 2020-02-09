@@ -6,8 +6,23 @@ const config = require('./config/config');
 const ANNC_CMD = '-annc';
 const EMBED_CMD = '-embed';
 
+function log(msg, action, error) {
+  const log = {
+    timestamp: new Date(),
+    action,
+    user: msg.member.user.tag,
+    content: msg.content,
+  };
+
+  if (error) {
+    log.error = error.message;
+  }
+
+  console.log(log);
+}
+
 function pingCmd(msg) {
-  console.log('Ping command');
+  log(msg, '-ping');
   return msg.reply('pong');
 }
 
@@ -15,7 +30,7 @@ function anncCmd(msg) {
   const message = msg.content.replace(ANNC_CMD, '');
   const anncChan = client.channels.get(config.anncChannelId);
 
-  console.log('Annc command');
+  log(msg, ANNC_CMD);
   return anncChan.send(message);
 }
 
@@ -25,11 +40,11 @@ function embedCmd(msg) {
   try {
     const embed = JSON.parse(message);
 
-    console.log('Embed command');
+    log(msg, EMBED_CMD);
     return msg.channel.send('', embed);
   } catch (e) {
-    console.error('Embed command failed::', e.message);
-    return msg.channel.send('Invalid JSON');
+    log(msg, EMBED_CMD, e);
+    return msg.channel.send(`Beep-boop, Invalid JSON (\`${e.message}\`)`);
   }
 }
 
@@ -44,8 +59,12 @@ client.on('message', async msg => {
       return;
     }
 
-    if (!msg.member.roles.has(config.adminRoleId)) {
+    if (
+      msg.member.id !== config.adminUserId &&
+      !msg.member.roles.has(config.adminRoleId)
+    ) {
       // Only admin roles can interact with bot
+      log(msg, 'auth', {message: 'Unauthorized'});
       return;
     }
 
@@ -61,7 +80,7 @@ client.on('message', async msg => {
       await embedCmd(msg);
     }
   } catch (e) {
-    console.log('Command Error', e.message);
+    log(msg, 'unexpected', e);
     msg.channel.send(`Uh oh, I'm confused (\`${e.message}\`)`);
   }
 });
