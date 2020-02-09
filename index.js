@@ -54,6 +54,10 @@ client.on('ready', () => {
 
 client.on('message', async msg => {
   try {
+    if (!msg.content.startsWith('-')) {
+      return;
+    }
+
     if (msg.member.id === client.user.id) {
       // Don't process bot's own messages
       return;
