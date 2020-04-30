@@ -1,10 +1,11 @@
-const {Client, RichEmbed} = require('discord.js');
+const {Client, RichEmbed, MessageAttachment} = require('discord.js');
 const client = new Client();
 
 const config = require('./config/config');
 
 const ANNC_CMD = '-annc';
 const EMBED_CMD = '-embed';
+const UPLOAD_CMD= '-upload';
 
 function log(msg, action, error) {
   const log = {
@@ -28,7 +29,7 @@ function pingCmd(msg) {
 
 function anncCmd(msg) {
   const message = msg.content.replace(ANNC_CMD, '');
-  const anncChan = client.channels.get(config.anncChannelId);
+  const anncChan = client.channels.cache.get(config.anncChannelId);
 
   log(msg, ANNC_CMD);
   return anncChan.send(message);
@@ -44,6 +45,20 @@ function embedCmd(msg) {
     return msg.channel.send('', embed);
   } catch (e) {
     log(msg, EMBED_CMD, e);
+    return msg.channel.send(`Beep-boop, Invalid JSON (\`${e.message}\`)`);
+  }
+}
+
+function uploadCmd(msg) {
+  const url = msg.content.replace(UPLOAD_CMD, '').trim();
+
+  try {
+    log(msg, UPLOAD_CMD);
+    const attachment = new MessageAttachment(url);
+    return msg.channel.send(attachment)
+  } catch (e) {
+    console.log(e);
+    log(msg, UPLOAD_CMD, e);
     return msg.channel.send(`Beep-boop, Invalid JSON (\`${e.message}\`)`);
   }
 }
@@ -82,6 +97,10 @@ client.on('message', async msg => {
 
     if (msg.content.includes(EMBED_CMD)) {
       await embedCmd(msg);
+    }
+
+    if (msg.content.includes(UPLOAD_CMD)) {
+      await uploadCmd(msg);
     }
   } catch (e) {
     log(msg, 'unexpected', e);
